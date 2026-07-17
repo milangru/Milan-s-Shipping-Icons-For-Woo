@@ -1,11 +1,19 @@
 <?php
 /**
- * Plugin Name: Milan's Shipping Icons For Woo
- * Description: Displays custom courier/shipping logos next to shipping methods on Cart, Checkout pages and emails using native WordPress safety standards.
- * Version:     1.0.0
- * Author:      Milan
- * License:     GPL2
- * Text Domain: milans-shipping-icons-woo
+ * Plugin Name:       Milan's Shipping Icons For Woo
+ * Requires Plugins:  woocommerce
+ * Description:       Displays custom courier/shipping logos next to shipping methods on Cart, Checkout pages and emails using native WordPress safety standards.
+ * Plugin URI:        https://github.com/milangru/Milan-s-Shipping-Icons-For-Woo
+ * Description:       Adds a "Shipped" order status and automatically sends tracking emails to customers.
+ * Version:           1.0.0
+ * Author:            Milan Grujić
+ * License:           GPLv2 or later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       milans-shipping-icons-woo
+ * Domain Path:       /languages
+ * Requires at least: 6.0
+ * Tested up to:      7.0
+ * Requires PHP:      7.4
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
