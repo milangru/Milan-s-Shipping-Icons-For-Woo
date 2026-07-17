@@ -1,0 +1,102 @@
+/* ==========================================================================
+   WooCommerce Dynamic Shipping Icons - Admin Styles
+   ========================================================================== */
+
+.msiw-settings-wrap {
+    margin-top: 20px;
+}
+
+.msiw-icons-table {
+    margin-top: 20px;
+    max-width: 900px;
+}
+
+.msiw-icons-table th {
+    padding: 10px;
+    font-weight: bold;
+    text-align: left;
+}
+
+.msiw-icons-table td {
+    padding: 12px;
+    vertical-align: middle;
+}
+
+/* Muted method-ID subtext under the shipping method name. */
+.msiw-method-id-subtext {
+    color: #666;
+}
+
+/* Shown when no active shipping methods exist. */
+.msiw-no-methods-found {
+    padding: 20px !important;
+    text-align: center;
+}
+
+/* Column widths (previously inline in PHP). */
+.msiw-col-zone {
+    width: 25%;
+}
+
+.msiw-col-method {
+    width: 30%;
+}
+
+.msiw-col-icon {
+    width: 45%;
+}
+
+/* Wrapper for a single icon-settings row. */
+.msiw-icon-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Preview image container. */
+.msiw-img-preview-container {
+    min-width: 60px;
+    height: 40px;
+    border: 1px dashed #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fafafa;
+}
+
+.msiw-icon-preview {
+    max-height: 35px;
+    max-width: 55px;
+}
+
+.msiw-no-img-placeholder {
+    font-size: 10px;
+    color: #aaa;
+}
+
+/* Delete button color. */
+.msiw-delete-icon-btn {
+    color: #b32d2e !important;
+}
+
+/* Hide the underlying URL text field. */
+.msiw-input-hidden {
+    display: none !important;
+}
+
+/* Dynamic visibility classes (replace inline styles). */
+.msiw-preview-hidden {
+    display: none !important;
+}
+
+.msiw-preview-visible {
+    display: block !important;
+}
+
+.msiw-placeholder-hidden {
+    display: none !important;
+}
+
+.msiw-placeholder-visible {
+    display: inline !important;
+}

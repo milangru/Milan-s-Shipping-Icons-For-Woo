@@ -1,0 +1,71 @@
+/* ==========================================================================
+   WooCommerce Dynamic Shipping Icons - Frontend Styles
+   ========================================================================== */
+
+/* Base styles for the classic Cart & Checkout display. */
+.shipping-method-icon,
+.blocks-js-shipping-icon {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    max-height: 28px !important; /* Adjust height as needed. */
+    width: auto !important;
+    margin-right: 12px !important;
+    margin-left: 4px !important;
+    border-radius: 4px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.2s ease;
+}
+
+li:hover .shipping-method-icon {
+    transform: scale(1.05);
+}
+
+/* Styles for the WooCommerce Blocks Checkout. */
+
+/* Force a horizontal layout for the whole row (radio button + icon + text). */
+.wc-block-components-radio-control__option {
+    display: flex !important;
+    max-width: stretch;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+}
+
+/* Align the label itself within the option. */
+.wc-block-components-radio-control-item__label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+}
+
+/* Wrapper for the name and price; grows to push the price to the right. */
+.wc-block-components-radio-control-item__label-group {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-grow: 1 !important;
+    gap: 10px !important;
+}
+
+/* Smaller variant used in the Order Summary / Cart Totals sidebar, next to the
+   compact method name text (e.g. "Fedex" under "Delivery" / "Shipping"). */
+.msiw-icon-summary {
+    max-height: 16px !important;
+    margin-right: 6px !important;
+    margin-left: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Mobile responsiveness. */
+@media (max-width: 768px) {
+    .shipping-method-icon,
+    .blocks-js-shipping-icon {
+        max-height: 22px !important;
+        margin-right: 8px !important;
+    }
+}
