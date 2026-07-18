@@ -53,6 +53,12 @@
     gap: 15px;
 }
 
+/* Extra breathing room when this row appears inside a shipping method's own
+   settings modal (Shipping Zones screen), between WC's native fields. */
+.msiw-instance-icon-row {
+    margin: 8px 0;
+}
+
 /* Preview image container. */
 .msiw-img-preview-container {
     min-width: 60px;

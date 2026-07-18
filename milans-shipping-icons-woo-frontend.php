@@ -294,7 +294,19 @@ function msiw_display_icon_order( $shipping, $order ) {
                 esc_url( $image_url )
             );
 
-            $shipping = $image_html . $shipping;
+            // $shipping looks like "$12.00 <small>via Fedex</small>" (WC_Order::get_shipping_to_display()),
+            // so prepending to the whole string would put the icon before the price, not the
+            // courier name. Insert it right before the method's name instead, wherever that
+            // name appears inside the "via %s" text.
+            $method_name = $shipping_method->get_name();
+
+            if ( $method_name && false !== strpos( $shipping, $method_name ) ) {
+                $shipping = str_replace( $method_name, $image_html . $method_name, $shipping );
+            } else {
+                // Fallback: if the name isn't found verbatim in the string for some reason,
+                // still show the icon rather than silently dropping it.
+                $shipping = $image_html . $shipping;
+            }
         }
     }
 
