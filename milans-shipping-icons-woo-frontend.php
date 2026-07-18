@@ -294,21 +294,72 @@ function msiw_display_icon_order( $shipping, $order ) {
                 esc_url( $image_url )
             );
 
-            // $shipping looks like "$12.00 <small>via Fedex</small>" (WC_Order::get_shipping_to_display()),
-            // so prepending to the whole string would put the icon before the price, not the
-            // courier name. Insert it right before the method's name instead, wherever that
-            // name appears inside the "via %s" text.
+            // $shipping sometimes looks like "$12.00 <small>via Fedex</small>" (older WC
+            // versions), so prepending to the whole string would put the icon before the
+            // price, not the courier name. Only insert here if the name actually appears in
+            // this string. In newer WooCommerce versions the method name lives in the row's
+            // label instead (handled by msiw_add_icon_to_order_totals_row() below), so if it's
+            // not found here, leave $shipping untouched rather than guessing a fallback spot.
             $method_name = $shipping_method->get_name();
 
             if ( $method_name && false !== strpos( $shipping, $method_name ) ) {
                 $shipping = str_replace( $method_name, $image_html . $method_name, $shipping );
-            } else {
-                // Fallback: if the name isn't found verbatim in the string for some reason,
-                // still show the icon rather than silently dropping it.
-                $shipping = $image_html . $shipping;
             }
         }
     }
 
     return $shipping;
+}
+
+// 4b. Some email templates (e.g. the admin "New order" notification) render shipping as a
+// "Shipping:" / price row in the order totals table, built from WC_Order::get_order_item_totals(),
+// rather than through get_shipping_to_display() above. That table can put the method name in
+// either the row's label or its value depending on the template, so check both and fall back
+// to prepending the icon to the price if the name isn't found in either.
+add_filter( 'woocommerce_get_order_item_totals', 'msiw_add_icon_to_order_totals_row', 10, 3 );
+function msiw_add_icon_to_order_totals_row( $total_rows, $order, $tax_display ) {
+    if ( empty( $total_rows['shipping'] ) ) {
+        return $total_rows;
+    }
+
+    $shipping_methods = $order->get_shipping_methods();
+    if ( empty( $shipping_methods ) ) {
+        return $total_rows;
+    }
+
+    $shipping_method = reset( $shipping_methods );
+    $method_key      = $shipping_method->get_method_id() . ':' . $shipping_method->get_instance_id();
+    $saved_icons     = get_option( 'msiw_custom_icons', array() );
+
+    if ( empty( $saved_icons[ $method_key ] ) ) {
+        return $total_rows;
+    }
+
+    $image_url  = $saved_icons[ $method_key ];
+    $image_html = sprintf(
+        '<img src="%s" alt="" style="vertical-align:middle;max-height:16px;width:auto;margin-right:4px;" />',
+        esc_url( $image_url )
+    );
+
+    $label = isset( $total_rows['shipping']['label'] ) ? $total_rows['shipping']['label'] : '';
+    $value = isset( $total_rows['shipping']['value'] ) ? $total_rows['shipping']['value'] : '';
+
+    // Avoid inserting twice if woocommerce_order_shipping_to_display already added it to $value.
+    if ( false !== strpos( $value, $image_url ) || false !== strpos( $label, $image_url ) ) {
+        return $total_rows;
+    }
+
+    $method_name = $shipping_method->get_name();
+
+    if ( $method_name && $label && false !== strpos( $label, $method_name ) ) {
+        $total_rows['shipping']['label'] = str_replace( $method_name, $image_html . $method_name, $label );
+    } elseif ( $method_name && $value && false !== strpos( $value, $method_name ) ) {
+        $total_rows['shipping']['value'] = str_replace( $method_name, $image_html . $method_name, $value );
+    } elseif ( $value ) {
+        // Fallback: name isn't in either column as text; still show the icon rather than
+        // dropping it, placed before the price.
+        $total_rows['shipping']['value'] = $image_html . $value;
+    }
+
+    return $total_rows;
 }
