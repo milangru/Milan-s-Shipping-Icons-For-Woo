@@ -12,7 +12,7 @@ Tested up to: 7.0
 
 Requires PHP: 7.4
 
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 
 License: GPLv2 or later
 
@@ -34,6 +34,7 @@ A WooCommerce plugin that displays a custom courier/shipping logo next to each s
     - Thank You / order confirmation page
     - WooCommerce order emails (customer and admin notifications)
 - Uses the native WordPress media library for icon selection
+- Optional review notice shown after 30 completed orders, fully translatable and dismissible
 
 ## Requirements
 
@@ -59,11 +60,13 @@ There are two UIs for the same underlying data:
 
 Both write to the same storage: WooCommerce's own per-instance settings option (`woocommerce_{method_id}_{instance_id}_settings`). Saving from the central table also mirrors the value into that option; saving from the per-method field is picked up by a hook on `updated_option`/`added_option` that mirrors it back into the central table's option. Either UI stays current no matter which one was used to make the change.
 
+Before any of this runs, the submitted `method_id:instance_id` key is checked against the shipping methods that actually exist across all zones, so a crafted form submission can't be used to create or overwrite an unrelated `woocommerce_*_settings` option.
+
 A known WooCommerce quirk: the built-in **Free Shipping** method has its own admin script that hides every field positioned after the "Free shipping requires" dropdown by default (treating them all as conditional, like "Minimum order amount"). The plugin detects when this happens to the icon field specifically and forces it back to visible, including re-forcing it if WooCommerce's script re-hides it again after a "requires" change.
 
 ### Frontend / Cart & Checkout blocks
 
-Since there's no PHP filter for the Cart & Checkout blocks, a small JS layer detects the shipping method the customer has selected and injects the matching icon:
+Since there's no PHP filter for the Cart & Checkout blocks, a small JS layer (enqueued via `wp_enqueue_script()`, data passed through `wp_localize_script()`) detects the shipping method the customer has selected and injects the matching icon:
 
 - On Checkout, it reads the exact rate ID from the checked radio button (authoritative, unaffected by custom method titles).
 - On the Cart page, which has no radio selector, it queries the WooCommerce Store API (`/wp-json/wc/store/v1/cart`) to find which rate is currently selected.
@@ -74,6 +77,10 @@ Since there's no PHP filter for the Cart & Checkout blocks, a small JS layer det
 - Classic Cart/Checkout: `woocommerce_cart_shipping_method_full_label` filter, using the exact method instance object passed by the hook.
 - Thank You page / emails: `woocommerce_order_shipping_to_display` and `woocommerce_get_order_item_totals` filters, since different WooCommerce versions/templates put the shipping method's name in different places (the row's value vs. its label).
 
+### Review notice
+
+`includes/class-review-notice.php` shows a dismissible admin notice once 30 orders have been completed while the plugin was active (order completion is counted internally, once per order). The notice offers "Sure, happy to leave a review" (opens WordPress.org in a new tab and records the dismissal in the background via `fetch()`, without reloading the current tab), "Remind me later" (snoozes for 7 days), and "No, thanks". All strings use the plugin's text domain and are translation-ready.
+
 ## Known limitations
 
 - WooCommerce's newer **Local Pickup** tab (`Settings → Shipping → Pickup Locations`) stores pickup locations separately from shipping zone method instances, using a different data model entirely. This is **not currently supported** — only the classic, zone-based Local Pickup method (listed alongside Flat Rate inside a Shipping Zone) works.
@@ -82,18 +89,35 @@ Since there's no PHP filter for the Cart & Checkout blocks, a small JS layer det
 ## File structure
 
 ```
-milans-shipping-icons-woo/
+milans-shipping-icons-for-woo/
 ├── milans-shipping-icons-woo.php            # Main plugin file, admin settings screen + per-method field
 ├── milans-shipping-icons-woo-frontend.php    # Frontend/blocks rendering logic
 ├── assets/
-│   └── css/
-│       ├── shipping-icons-admin.css
-│       └── shipping-icons-frontend.css
+│   ├── css/
+│   │   ├── shipping-icons-admin.css
+│   │   └── shipping-icons-frontend.css
+│   └── js/
+│       ├── shipping-icons-admin.js
+│       └── shipping-icons-frontend.js
+├── includes/
+│   ├── class-review-notice.php               # "Leave a review" admin notice (shown after 30 completed orders)
+│   ├── css/
+│   │   └── review-notice.css
+│   └── js/
+│       └── review-notice.js
 ├── readme.txt                                # WordPress.org readme
 └── readme.md                                 # This file
 ```
 
 ## Changelog
+
+### 1.1.1
+
+- Security: the admin settings-save handler now validates every "method:instance" key from the submitted form against the shipping methods that actually exist, before it's used to build or write to a `woocommerce_*_settings` option.
+- Security: nonce and action values read from `$_GET`/`$_POST` are now unslashed before sanitizing, per WordPress coding standards.
+- All inline `<script>` blocks were replaced with properly enqueued, versioned JS files, with dynamic data passed via `wp_localize_script()` instead of being printed directly into the page.
+- Fixed the plugin's text domain, which didn't match the plugin slug, so translations can load correctly.
+- Added an optional, translatable review notice shown after 30 completed orders (`includes/class-review-notice.php`).
 
 ### 1.1.0
 

@@ -5,7 +5,7 @@ Tags: woocommerce, shipping, icons, checkout, cart
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires Plugins: woocommerce
@@ -46,7 +46,7 @@ Each shipping method (per shipping zone) gets its own icon. Once saved, the plug
 
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/milans-shipping-icons-woo` directory, or install the plugin directly through the WordPress plugins screen.
+1. Upload the plugin files to the `/wp-content/plugins/milans-shipping-icons-for-woo` directory, or install the plugin directly through the WordPress plugins screen.
 2. Activate the plugin through the "Plugins" screen in WordPress.
 3. Make sure WooCommerce is installed and active.
 4. Go to WooCommerce → Settings → Shipping Icons, **or** open any shipping method under WooCommerce → Settings → Shipping → Shipping zones.
@@ -83,6 +83,13 @@ Not currently. That feature stores pickup locations in a separate system from sh
 
 == Changelog ==
 
+= 1.1.1 =
+* Security: the admin settings-save handler now validates every "method:instance" key from the submitted form against the shipping methods that actually exist, before it's used to build or write to a `woocommerce_*_settings` option.
+* Security: nonce and action values read from `$_GET`/`$_POST` are now unslashed before sanitizing, per WordPress coding standards.
+* All inline `<script>` blocks were replaced with properly enqueued, versioned JS files (`wp_enqueue_script()` / `wp_register_script()`), with dynamic data passed via `wp_localize_script()` instead of being printed directly into the page.
+* Fixed the plugin's text domain, which didn't match the plugin slug, so translations can load correctly.
+* Added an optional review notice (`WooCommerce → Settings` and other admin screens) shown once the plugin has helped process 30 completed orders, with "Remind me later" and "No, thanks" options. Fully translatable and dismissible; can be safely ignored.
+
 = 1.1.0 =
 * Added a "Shipping Icon" field directly inside each shipping method's own settings screen (Shipping Zones), in addition to the central table, kept in two-way sync with it.
 * Field is registered dynamically for every shipping method WooCommerce knows about, including third-party method classes, with no hardcoded list.
@@ -97,6 +104,9 @@ Not currently. That feature stores pickup locations in a separate system from sh
 * WooCommerce Store API lookup to correctly detect the selected method on the Cart page.
 
 == Upgrade Notice ==
+
+= 1.1.1 =
+Security hardening for the settings-save handler, inline scripts replaced with properly enqueued assets, and a corrected text domain. Recommended update.
 
 = 1.1.0 =
 Adds a per-method icon field (synced with the central table) and fixes several display issues. Recommended update.

@@ -4,11 +4,11 @@
  * Requires Plugins:  woocommerce
  * Description:       Displays custom courier/shipping logos next to shipping methods on Cart, Checkout pages and emails using native WordPress safety standards.
  * Plugin URI:        https://github.com/milangru/Milan-s-Shipping-Icons-For-Woo
- * Version:           1.1.0
+ * Version:           1.1.1
  * Author:            Milan Grujić
  * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       milans-shipping-icons-woo
+ * Text Domain:       milans-shipping-icons-for-woo
  * Domain Path:       /languages
  * Requires at least: 6.0
  * Tested up to:      7.0
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'MSIW_VERSION', '1.0.0' );
+define( 'MSIW_VERSION', '1.1.1' );
 
 // Safely load the frontend rendering logic.
 $msiw_frontend_file = plugin_dir_path( __FILE__ ) . 'milans-shipping-icons-woo-frontend.php';
@@ -27,10 +27,17 @@ if ( file_exists( $msiw_frontend_file ) ) {
     require_once $msiw_frontend_file;
 }
 
+// Safely load the review notice, shown after 30 completed orders.
+$msiw_review_notice_file = plugin_dir_path( __FILE__ ) . 'includes/class-review-notice.php';
+if ( file_exists( $msiw_review_notice_file ) ) {
+    require_once $msiw_review_notice_file;
+    new MSIW_Review_Notice();
+}
+
 // 1. Add a custom tab to WooCommerce Settings.
 add_filter( 'woocommerce_settings_tabs_array', 'msiw_add_settings_tab', 50 );
 function msiw_add_settings_tab( $settings_tabs ) {
-    $settings_tabs['msiw_settings_tab'] = __( 'Shipping Icons', 'milans-shipping-icons-woo' );
+    $settings_tabs['msiw_settings_tab'] = __( 'Shipping Icons', 'milans-shipping-icons-for-woo' );
     return $settings_tabs;
 }
 
@@ -46,8 +53,8 @@ function msiw_settings_tab_content() {
     );
     ?>
     <div class="msiw-settings-wrap">
-        <h2><?php esc_html_e( 'Shipping Method Icons Configuration', 'milans-shipping-icons-woo' ); ?></h2>
-        <p><?php esc_html_e( 'Choose logos that will be displayed next to each shipping method name during Checkout and on the Cart page.', 'milans-shipping-icons-woo' ); ?></p>
+        <h2><?php esc_html_e( 'Shipping Method Icons Configuration', 'milans-shipping-icons-for-woo' ); ?></h2>
+        <p><?php esc_html_e( 'Choose logos that will be displayed next to each shipping method name during Checkout and on the Cart page.', 'milans-shipping-icons-for-woo' ); ?></p>
 
         <!-- Native WP nonce field for security. -->
         <?php wp_nonce_field( 'msiw_save_shipping_icons_action', 'msiw_shipping_icons_nonce_field' ); ?>
@@ -55,9 +62,9 @@ function msiw_settings_tab_content() {
         <table class="wp-list-table widefat fixed striped msiw-icons-table">
             <thead>
                 <tr>
-                    <th class="msiw-col-zone"><?php esc_html_e( 'Shipping Zone', 'milans-shipping-icons-woo' ); ?></th>
-                    <th class="msiw-col-method"><?php esc_html_e( 'Shipping Method (ID)', 'milans-shipping-icons-woo' ); ?></th>
-                    <th class="msiw-col-icon"><?php esc_html_e( 'Icon / Logo', 'milans-shipping-icons-woo' ); ?></th>
+                    <th class="msiw-col-zone"><?php esc_html_e( 'Shipping Zone', 'milans-shipping-icons-for-woo' ); ?></th>
+                    <th class="msiw-col-method"><?php esc_html_e( 'Shipping Method (ID)', 'milans-shipping-icons-for-woo' ); ?></th>
+                    <th class="msiw-col-icon"><?php esc_html_e( 'Icon / Logo', 'milans-shipping-icons-for-woo' ); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -87,13 +94,13 @@ function msiw_settings_tab_content() {
                             </td>
                             <td>
                                 <strong><?php echo esc_html( $method->get_title() ); ?></strong><br>
-                                <small class="msiw-method-id-subtext"><?php esc_html_e( 'ID:', 'milans-shipping-icons-woo' ); ?> <?php echo esc_html( $method_key ); ?></small>
+                                <small class="msiw-method-id-subtext"><?php esc_html_e( 'ID:', 'milans-shipping-icons-for-woo' ); ?> <?php echo esc_html( $method_key ); ?></small>
                             </td>
                             <td>
                                 <div class="msiw-icon-row">
                                     <div class="msiw-img-preview-container">
                                         <img class="msiw-icon-preview <?php echo esc_attr( $has_image_class ); ?>" src="<?php echo esc_url( $current_value ); ?>" />
-                                        <span class="msiw-no-img-placeholder <?php echo esc_attr( $has_text_class ); ?>"><?php esc_html_e( 'No image', 'milans-shipping-icons-woo' ); ?></span>
+                                        <span class="msiw-no-img-placeholder <?php echo esc_attr( $has_text_class ); ?>"><?php esc_html_e( 'No image', 'milans-shipping-icons-for-woo' ); ?></span>
                                     </div>
 
                                     <input type="text"
@@ -101,8 +108,8 @@ function msiw_settings_tab_content() {
                                            class="msiw-icon-url msiw-wc-native-field msiw-input-hidden"
                                            value="<?php echo esc_url( $current_value ); ?>" />
 
-                                    <button type="button" class="button button-secondary msiw-upload-icon-btn"><?php esc_html_e( 'Choose Image', 'milans-shipping-icons-woo' ); ?></button>
-                                    <button type="button" class="button button-link msiw-delete-icon-btn <?php echo esc_attr( $has_image_class ); ?>"><?php esc_html_e( 'Remove', 'milans-shipping-icons-woo' ); ?></button>
+                                    <button type="button" class="button button-secondary msiw-upload-icon-btn"><?php esc_html_e( 'Choose Image', 'milans-shipping-icons-for-woo' ); ?></button>
+                                    <button type="button" class="button button-link msiw-delete-icon-btn <?php echo esc_attr( $has_image_class ); ?>"><?php esc_html_e( 'Remove', 'milans-shipping-icons-for-woo' ); ?></button>
                                 </div>
                             </td>
                         </tr>
@@ -114,7 +121,7 @@ function msiw_settings_tab_content() {
                     ?>
                     <tr>
                         <td colspan="3" class="msiw-no-methods-found">
-                            <?php esc_html_e( 'No active shipping methods found.', 'milans-shipping-icons-woo' ); ?>
+                            <?php esc_html_e( 'No active shipping methods found.', 'milans-shipping-icons-for-woo' ); ?>
                         </td>
                     </tr>
                     <?php
@@ -131,16 +138,44 @@ add_action( 'woocommerce_update_options_msiw_settings_tab', 'msiw_save_settings'
 function msiw_save_settings() {
     // Verify nonce first.
     if ( ! isset( $_POST['msiw_shipping_icons_nonce_field'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['msiw_shipping_icons_nonce_field'] ) ), 'msiw_save_shipping_icons_action' ) ) {
-        wp_die( esc_html__( 'Security check failed. Please try again.', 'milans-shipping-icons-woo' ) );
+        wp_die( esc_html__( 'Security check failed. Please try again.', 'milans-shipping-icons-for-woo' ) );
     }
 
     if ( isset( $_POST['shipping_icons'] ) && is_array( $_POST['shipping_icons'] ) ) {
         // Unslash and sanitize in the same call so each array value is escaped as a URL.
-        $saved_icons = array_map( 'esc_url_raw', wp_unslash( $_POST['shipping_icons'] ) );
+        $posted_icons = array_map( 'esc_url_raw', wp_unslash( $_POST['shipping_icons'] ) );
+
+        // Only keep entries whose "method_id:instance_id" key belongs to a shipping
+        // method instance that actually exists. Without this, a crafted POST key could
+        // make msiw_mirror_to_instance_settings() create/overwrite an arbitrary
+        // woocommerce_{method}_{instance}_settings option below.
+        $valid_keys  = msiw_get_valid_method_keys();
+        $saved_icons = array_intersect_key( $posted_icons, $valid_keys );
 
         update_option( 'msiw_custom_icons', $saved_icons );
         msiw_mirror_to_instance_settings( $saved_icons );
     }
+}
+
+// 4. Builds a whitelist of "method_id:instance_id" keys for every shipping method
+//    instance that currently exists across all zones (including the default "Rest of
+//    the World" zone). Used to validate any method_key coming from user input before
+//    it's used to build an option name or written to instance settings.
+function msiw_get_valid_method_keys() {
+    $valid_keys     = array();
+    $shipping_zones = WC_Shipping_Zones::get_zones();
+    $shipping_zones[] = array( 'zone_id' => 0 );
+
+    foreach ( $shipping_zones as $zone_data ) {
+        $zone    = new WC_Shipping_Zone( $zone_data['zone_id'] );
+        $methods = $zone->get_shipping_methods();
+
+        foreach ( $methods as $method ) {
+            $valid_keys[ $method->id . ':' . $method->instance_id ] = true;
+        }
+    }
+
+    return $valid_keys;
 }
 
 // 5. Add a "Shipping Icon" field directly inside each shipping method's own settings
@@ -160,9 +195,9 @@ function msiw_register_instance_icon_field_for_all_methods( $methods ) {
 }
 function msiw_add_instance_icon_field( $fields ) {
     $fields['msiw_icon_url'] = array(
-        'title'       => __( 'Shipping Icon', 'milans-shipping-icons-woo' ),
+        'title'       => __( 'Shipping Icon', 'milans-shipping-icons-for-woo' ),
         'type'        => 'text',
-        'description' => __( 'Icon shown next to this method at checkout. Use the Choose Image button below the field.', 'milans-shipping-icons-woo' ),
+        'description' => __( 'Icon shown next to this method at checkout. Use the Choose Image button below the field.', 'milans-shipping-icons-for-woo' ),
         'desc_tip'    => false,
         'default'     => '',
         'css'         => 'display:none;', // Hidden; the JS-rendered media picker below replaces it visually.
@@ -215,7 +250,15 @@ function msiw_maybe_sync_instance_option( $option, $value ) {
 //    that method's own instance settings option, so its per-method field shows the
 //    up-to-date value the next time its modal is opened.
 function msiw_mirror_to_instance_settings( $saved_icons ) {
+    $valid_keys = msiw_get_valid_method_keys();
+
     foreach ( $saved_icons as $method_key => $icon_url ) {
+        // Belt-and-suspenders: skip anything that isn't a real, existing method
+        // instance, even though msiw_save_settings() already filtered for this.
+        if ( ! isset( $valid_keys[ $method_key ] ) ) {
+            continue;
+        }
+
         $parts = explode( ':', $method_key, 2 );
         if ( 2 !== count( $parts ) ) {
             continue;
@@ -254,162 +297,24 @@ function msiw_admin_assets( $hook ) {
 
     wp_enqueue_media();
 
-    add_action( 'admin_footer', 'msiw_admin_footer_script' );
+    wp_enqueue_script(
+        'msiw-admin-js',
+        plugin_dir_url( __FILE__ ) . 'assets/js/shipping-icons-admin.js',
+        array( 'jquery' ),
+        MSIW_VERSION,
+        true
+    );
+
+    wp_localize_script(
+        'msiw-admin-js',
+        'msiwAdminData',
+        array(
+            'chooseIconTitle' => __( 'Choose Shipping Icon', 'milans-shipping-icons-for-woo' ),
+            'chooseImageText' => __( 'Choose Image', 'milans-shipping-icons-for-woo' ),
+            'useImageText'    => __( 'Use this image', 'milans-shipping-icons-for-woo' ),
+            'removeText'      => __( 'Remove', 'milans-shipping-icons-for-woo' ),
+            'noImageText'     => __( 'No image', 'milans-shipping-icons-for-woo' ),
+        )
+    );
 }
 
-function msiw_admin_footer_script() {
-    ?>
-    <script type="text/javascript">
-        jQuery(document).ready(function($) {
-
-            // Turns the plain (hidden) "Shipping Icon" text field inside a shipping
-            // method's own settings modal into the same preview + upload UI used by the
-            // central table, reusing the same classes so the click handlers below work
-            // for both without duplication.
-            // WooCommerce's own admin script for the Free Shipping method treats every
-            // field that comes after the "requires" dropdown as conditional (like
-            // "Minimum order amount"), and hides it via an inline display:none — even
-            // though our field has nothing to do with that setting. This forces our
-            // field's label and fieldset to stay visible, and keeps re-forcing it if
-            // WooCommerce's script re-hides it again (e.g. when "requires" changes).
-            function msiwForceFieldVisible(input) {
-                var id = input.attr('id');
-                if (!id) {
-                    return;
-                }
-
-                var label = $('label[for="' + id + '"]');
-                var fieldset = input.closest('fieldset');
-
-                function unhide(el) {
-                    if (el.length && el.css('display') === 'none') {
-                        el.css('display', '');
-                    }
-                }
-
-                unhide(label);
-                unhide(fieldset);
-
-                if (typeof MutationObserver === 'undefined') {
-                    return;
-                }
-
-                [label.get(0), fieldset.get(0)].forEach(function(el) {
-                    if (!el || el.msiwVisibilityGuarded) {
-                        return;
-                    }
-                    el.msiwVisibilityGuarded = true;
-
-                    var guard = new MutationObserver(function() {
-                        if (el.style.display === 'none') {
-                            el.style.display = '';
-                        }
-                    });
-                    guard.observe(el, { attributes: true, attributeFilter: ['style'] });
-                });
-            }
-
-            function msiwEnhanceInstanceFields(context) {
-                var scope = context ? $(context) : $(document);
-
-                scope.find('input[id$="_msiw_icon_url"]').each(function() {
-                    var input = $(this);
-
-                    if (input.data('msiwEnhanced')) {
-                        return;
-                    }
-                    input.data('msiwEnhanced', true);
-                    input.addClass('msiw-icon-url msiw-input-hidden');
-
-                    var currentValue = input.val();
-                    var hasImageClass = currentValue ? 'msiw-preview-visible' : 'msiw-preview-hidden';
-                    var hasTextClass = currentValue ? 'msiw-placeholder-hidden' : 'msiw-placeholder-visible';
-
-                    var row = $(
-                        '<div class="msiw-icon-row msiw-instance-icon-row">' +
-                            '<div class="msiw-img-preview-container">' +
-                                '<img class="msiw-icon-preview ' + hasImageClass + '" src="' + currentValue + '" />' +
-                                '<span class="msiw-no-img-placeholder ' + hasTextClass + '"><?php echo esc_js( __( 'No image', 'milans-shipping-icons-woo' ) ); ?></span>' +
-                            '</div>' +
-                            '<button type="button" class="button button-secondary msiw-upload-icon-btn"><?php echo esc_js( __( 'Choose Image', 'milans-shipping-icons-woo' ) ); ?></button>' +
-                            '<button type="button" class="button button-link msiw-delete-icon-btn ' + hasImageClass + '"><?php echo esc_js( __( 'Remove', 'milans-shipping-icons-woo' ) ); ?></button>' +
-                        '</div>'
-                    );
-
-                    var marker = $('<span></span>');
-                    input.before(marker);
-                    input.detach();
-                    row.append(input);
-                    marker.replaceWith(row);
-
-                    msiwForceFieldVisible(input);
-                });
-            }
-
-            // The shipping method modal is injected into the DOM after the merchant
-            // clicks a method row (it isn't present on initial page load), so watch for it
-            // instead of only enhancing once on ready.
-            if (typeof MutationObserver !== 'undefined') {
-                var modalObserver = new MutationObserver(function() {
-                    msiwEnhanceInstanceFields();
-                });
-                modalObserver.observe(document.body, { childList: true, subtree: true });
-            }
-
-            msiwEnhanceInstanceFields();
-
-            // Delegated so these also work on rows added later (instance modal),
-            // not just the rows present in the central table at page load.
-            $(document).on('click', '.msiw-upload-icon-btn', function(e) {
-                e.preventDefault();
-                var button = $(this);
-                var row = button.closest('.msiw-icon-row');
-                var input = row.find('.msiw-icon-url');
-                var preview = row.find('.msiw-icon-preview');
-                var placeholder = row.find('.msiw-no-img-placeholder');
-                var deleteBtn = row.find('.msiw-delete-icon-btn');
-
-                var uploader = wp.media({
-                    title: '<?php echo esc_js( __( 'Choose Shipping Icon', 'milans-shipping-icons-woo' ) ); ?>',
-                    button: { text: '<?php echo esc_js( __( 'Use this image', 'milans-shipping-icons-woo' ) ); ?>' },
-                    multiple: false
-                }).on('select', function() {
-                    var attachment = uploader.state().get('selection').first().toJSON();
-                    input.val(attachment.url).trigger('change');
-
-                    preview.attr('src', attachment.url)
-                           .removeClass('msiw-preview-hidden')
-                           .addClass('msiw-preview-visible');
-
-                    placeholder.removeClass('msiw-placeholder-visible')
-                               .addClass('msiw-placeholder-hidden');
-
-                    deleteBtn.removeClass('msiw-preview-hidden')
-                             .addClass('msiw-preview-visible');
-                }).open();
-            });
-
-            $(document).on('click', '.msiw-delete-icon-btn', function(e) {
-                e.preventDefault();
-                var button = $(this);
-                var row = button.closest('.msiw-icon-row');
-                var input = row.find('.msiw-icon-url');
-                var preview = row.find('.msiw-icon-preview');
-                var placeholder = row.find('.msiw-no-img-placeholder');
-
-                input.val('').trigger('change');
-
-                preview.removeClass('msiw-preview-visible')
-                       .addClass('msiw-preview-hidden')
-                       .attr('src', '');
-
-                placeholder.removeClass('msiw-placeholder-hidden')
-                           .addClass('msiw-placeholder-visible');
-
-                button.removeClass('msiw-preview-visible')
-                      .addClass('msiw-preview-hidden');
-            });
-        });
-    </script>
-    <?php
-}

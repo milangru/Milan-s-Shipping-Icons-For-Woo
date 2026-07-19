@@ -1,0 +1,25 @@
+/* Styling for the "leave a review" admin notice. */
+
+.msiw-review-notice {
+    padding: 15px;
+    position: relative;
+}
+
+.msiw-review-notice p {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+
+.msiw-review-notice p:last-child {
+    margin-bottom: 0;
+}
+
+.msiw-review-notice .button {
+    margin-right: 5px;
+}
+
+.msiw-review-notice .button-link {
+    color: #dc3232;
+    text-decoration: none;
+    margin-left: 5px;
+}
